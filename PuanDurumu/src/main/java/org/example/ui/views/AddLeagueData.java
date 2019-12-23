@@ -1,7 +1,7 @@
 package org.example.ui.views;
 
 import com.vaadin.ui.*;
-import javafx.beans.binding.IntegerBinding;
+import org.example.dao.LeagueDao;
 import org.example.domain.Teams;
 import org.example.domain.League;
 import org.example.hibernateUtil.HibernateUtil;
@@ -11,28 +11,35 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
 import javax.persistence.PersistenceException;
-import java.util.Date;
 import java.util.List;
 
 public class AddLeagueData extends VerticalLayout {
     ComboBox comboTeam = null;
     private FormLayout mainLayout;
+    private TextField victoryField;
+    private TextField defeatField;
+    private TextField tieField;
+    private TextField idField;
 
     public AddLeagueData() {
+        mainLayOut();
+    }
+
+    private void mainLayOut() {
         mainLayout = new FormLayout();
         addComponent(mainLayout);
 
-        TextField idField = new TextField("Id");
+        idField = new TextField("Id");
         idField.setEnabled(false);
         mainLayout.addComponent(idField);
 
-        TextField victoryField = new TextField("Victory");
+        victoryField = new TextField("Victory");
         mainLayout.addComponent(victoryField);
 
-        TextField defeatField = new TextField("Defeat");
+        defeatField = new TextField("Defeat");
         mainLayout.addComponent(defeatField);
 
-        TextField tieField = new TextField("Tie");
+        tieField = new TextField("Tie");
         mainLayout.addComponent(tieField);
 
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
@@ -44,41 +51,33 @@ public class AddLeagueData extends VerticalLayout {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
         SaveButton btnSave = new SaveButton();
         btnSave.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
-                SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-                try (Session session = sessionFactory.openSession();) {
-                    session.getTransaction().begin();
-
-                    int victoryFieldValue = Integer.parseInt(victoryField.getValue());
-                    int defeatFieldValue = Integer.parseInt(defeatField.getValue());
-                    int tieFieldValue = Integer.parseInt(tieField.getValue());
-                    int pointFieldValue = victoryFieldValue*3 + tieFieldValue*1;
-                    Teams teamFieldValue = (Teams)comboTeam.getValue();
-
-                    League league = new League();
-                    league.setTeams(teamFieldValue);
-                    league.setVictory(victoryFieldValue);
-                    league.setDefeat(defeatFieldValue);
-                    league.setPoint(pointFieldValue);
-                    league.setTie(tieFieldValue);
-                    try {
-                        session.merge(league);
-                        session.getTransaction().commit();
-                        Notification.show("İşlem Başarılı.");
-                    }
-                    catch (PersistenceException e) {
-                        Notification.show("username already exist");
-                    }
-                } catch (Exception ex) {
-                    System.out.println(ex.getMessage());
-                    Notification.show(ex.getMessage(), Notification.Type.ERROR_MESSAGE);
-                }
+                addLeagueView();
             }
         });
         mainLayout.addComponent(btnSave);
     }
+
+    private void addLeagueView() {
+        int victoryFieldValue = Integer.parseInt(victoryField.getValue());
+        int defeatFieldValue = Integer.parseInt(defeatField.getValue());
+        int tieFieldValue = Integer.parseInt(tieField.getValue());
+        int pointFieldValue = victoryFieldValue*3 + tieFieldValue*1;
+        Teams teamFieldValue = (Teams)comboTeam.getValue();
+
+        League league = new League();
+        league.setTeams(teamFieldValue);
+        league.setVictory(victoryFieldValue);
+        league.setDefeat(defeatFieldValue);
+        league.setPoint(pointFieldValue);
+        league.setTie(tieFieldValue);
+
+        LeagueDao leagueDao = new LeagueDao();
+        leagueDao.saveLeagueView(league);
+    }
+
+
 }
