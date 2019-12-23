@@ -52,7 +52,7 @@ public class SideBar extends VerticalLayout {
         });
         addComponent(btnTakimListeleButton);
 
-        BtnLigVeriEkle = new MenuButton(FontAwesome.LIST);
+        BtnLigVeriEkle = new MenuButton(FontAwesome.PLUS_SQUARE);
         BtnLigVeriEkle.setCaption("Lig Veri Ekle");
         BtnLigVeriEkle.addClickListener(new Button.ClickListener() {
             @Override

@@ -5,10 +5,12 @@ import javafx.beans.binding.IntegerBinding;
 import org.example.domain.Teams;
 import org.example.domain.League;
 import org.example.hibernateUtil.HibernateUtil;
+import org.example.ui.components.SaveButton;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
+import javax.persistence.PersistenceException;
 import java.util.Date;
 import java.util.List;
 
@@ -43,8 +45,7 @@ public class AddLeagueData extends VerticalLayout {
             System.out.println(ex.getMessage());
         }
 
-        Button btnSave = new Button("Ekle");
-        btnSave.setCaption("Ekle");
+        SaveButton btnSave = new SaveButton();
         btnSave.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
@@ -56,17 +57,22 @@ public class AddLeagueData extends VerticalLayout {
                     int defeatFieldValue = Integer.parseInt(defeatField.getValue());
                     int tieFieldValue = Integer.parseInt(tieField.getValue());
                     int pointFieldValue = victoryFieldValue*3 + tieFieldValue*1;
-                    Teams kategoriFieldValue = (Teams)comboTeam.getValue();
+                    Teams teamFieldValue = (Teams)comboTeam.getValue();
 
                     League league = new League();
-                    league.setTeams(kategoriFieldValue);
+                    league.setTeams(teamFieldValue);
                     league.setVictory(victoryFieldValue);
                     league.setDefeat(defeatFieldValue);
                     league.setPoint(pointFieldValue);
                     league.setTie(tieFieldValue);
-                    session.merge(league);
-                    session.getTransaction().commit();
-                    Notification.show("İşlem Başarılı");
+                    try {
+                        session.merge(league);
+                        session.getTransaction().commit();
+                        Notification.show("İşlem Başarılı.");
+                    }
+                    catch (PersistenceException e) {
+                        Notification.show("username already exist");
+                    }
                 } catch (Exception ex) {
                     System.out.println(ex.getMessage());
                     Notification.show(ex.getMessage(), Notification.Type.ERROR_MESSAGE);

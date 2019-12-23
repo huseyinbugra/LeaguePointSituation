@@ -23,6 +23,4 @@ public class Header extends VerticalLayout {
     public void setHeader(String title) {
         h1.setValue(title);
     }
-
 }
-

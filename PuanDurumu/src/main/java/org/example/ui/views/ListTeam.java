@@ -66,7 +66,7 @@ public class ListTeam extends HorizontalLayout {
     private void buildTable() {
         table = new Table();
         table.setContainerDataSource(indexedContainer);
-        table.setColumnHeaders("NO", "İSİM");
+        table.setColumnHeaders("NO", "TAKIM ADI");
         table.setSelectable(true);
         table.setMultiSelectMode(MultiSelectMode.SIMPLE);
         table.setMultiSelect(false);
@@ -88,28 +88,30 @@ public class ListTeam extends HorizontalLayout {
         idField.setEnabled(false);
         formLayout.addComponent(idField);
 
-        nameField = new TextField("Name");
+        nameField = new TextField("Takım Adı");
         formLayout.addComponent(nameField);
 
         saveButton = new SaveButton();
+        saveButton.setCaption("Güncelle");
         saveButton.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
                 SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-                Session sessionEx = null;
+
                 try (Session session = sessionFactory.openSession();) {
-                    sessionEx = session;
                     session.getTransaction().begin();
                     String nameFieldValue = nameField.getValue();
+
                     Teams team = new Teams();
                     team.setId(Long.parseLong(idField.getValue()));
                     team.setTeamName(nameFieldValue);
                     team = (Teams) session.merge(team);
+
                     idField.setValue(team.getId().toString());
                     session.getTransaction().commit();
                     Notification.show("İşlem Başarılı");
+
                 } catch (Exception ex) {
-                    sessionEx.getTransaction().rollback();
                     System.out.println(ex.getMessage());
                     Notification.show(ex.getMessage(), Notification.Type.ERROR_MESSAGE);
                 }

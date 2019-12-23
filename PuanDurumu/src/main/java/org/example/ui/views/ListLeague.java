@@ -49,6 +49,7 @@ public class ListLeague extends HorizontalLayout {
         indexedContainer = new IndexedContainer();
         indexedContainer.addContainerProperty("id", Long.class, null);
         indexedContainer.addContainerProperty("team", Teams.class, null);
+        indexedContainer.addContainerProperty("mac_sayisi", Integer.class, null);
         indexedContainer.addContainerProperty("victory", Integer.class, null);
         indexedContainer.addContainerProperty("defeat", Integer.class, null);
         indexedContainer.addContainerProperty("tie", Integer.class, null);
@@ -56,7 +57,7 @@ public class ListLeague extends HorizontalLayout {
     }
 
     private void fillTable() {
-        long i = 1;
+        long puan = 1;
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         try (Session session = sessionFactory.openSession();) {
             Query query = session.createQuery("Select league From League league left join fetch league.teams team order by league.point desc");
@@ -64,12 +65,13 @@ public class ListLeague extends HorizontalLayout {
             for (League league : leagueList) {
                 Item item = indexedContainer.addItem(league);
                 item.getItemProperty("team").setValue(league.getTeams());
-                item.getItemProperty("id").setValue(i);
+                item.getItemProperty("id").setValue(puan);
                 item.getItemProperty("defeat").setValue(league.getDefeat());
                 item.getItemProperty("point").setValue(league.getPoint());
                 item.getItemProperty("tie").setValue(league.getTie());
                 item.getItemProperty("victory").setValue(league.getVictory());
-                i++;
+                item.getItemProperty("mac_sayisi").setValue(league.getDefeat()+league.getTie()+league.getVictory());
+                puan++;
             }
 
         } catch (Exception ex) {
@@ -79,7 +81,7 @@ public class ListLeague extends HorizontalLayout {
     private void buildTable() {
         table = new Table();
         table.setContainerDataSource(indexedContainer);
-        table.setColumnHeaders("Sıra", "Team","Victory","Defeat","Tie","Point");
+        table.setColumnHeaders("Sıra","Team","Toplam Maç Sayısı","Victory","Defeat","Tie","Point");
         table.setSelectable(true);
         table.setMultiSelectMode(MultiSelectMode.SIMPLE);
         table.setMultiSelect(false);
@@ -122,6 +124,7 @@ public class ListLeague extends HorizontalLayout {
         formLayout.addComponent(pointField);
 
         saveButton = new SaveButton();
+        saveButton.setCaption("Güncelle");
         saveButton.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
